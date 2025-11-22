@@ -150,7 +150,7 @@ Se implementa como un **pulso rectangular**:
 - Presente sólo entre:
 
 $$
-t \in [t_{\text{inicio}},\; t_{\text{inicio}} + \Delta t]
+t \in [t_{\text{inicio}}\; t_{\text{inicio}} + \Delta t]
 $$
 
 ---
