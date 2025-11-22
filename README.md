@@ -142,13 +142,16 @@ con integración acumulada y derivada aproximada por diferencias finitas.
 
 ---
 
-### 6.3 Perturbación p(t)
+## 6.3 Perturbación p(t)
 
 Se implementa como un **pulso rectangular**:
 
-- Amplitud definida por el slider.  
-- Presente sólo entre \( t \in [t_{inicio}, t_{inicio} + \Delta t] \).  
+- Amplitud definida por el slider.
+- Presente sólo entre:
 
+$$
+t \in [t_{\text{inicio}},\; t_{\text{inicio}} + \Delta t]
+$$
 ---
 
 ## 7. Experimentos sugeridos
