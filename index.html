@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Simulación PID - Pava Eléctrica (Animada)</title>
+
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        header {
+            background: #111827;
+            color: #f9fafb;
+            padding: 1rem 2rem;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        main {
+            padding: 1.5rem 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panel-controles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+        }
+
+        .grupo-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .grupo-control label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .grupo-control span.valor {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .botonera {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            background: #2563eb;
+            color: #f9fafb;
+            font-weight: 600;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            background: #1d4ed8;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.45);
+        }
+
+        button:active {
+            transform: translateY(0px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        button.secondary {
+            background: #6b7280;
+            box-shadow: 0 8px 20px rgba(55, 65, 81, 0.35);
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        .plots {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .plot-card {
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+        }
+
+        .plot-card h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+            color: #111827;
+        }
+
+        .plot {
+            width: 100%;
+            height: 360px;
+        }
+
+        footer {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Simulación PID – Pava Eléctrica Inteligente (animada)</h1>
+</header>
+
+<main>
+    <section class="panel-controles">
+        <!-- Referencia theta_0 -->
+        <div class="grupo-control">
+            <label for="thetaRef">θ₀ (Temperatura nominal) [°C]</label>
+            <input id="thetaRef" type="range" min="40" max="100" step="1" value="90" />
+            <span class="valor">Valor: <span id="thetaRefVal">90</span> °C</span>
+        </div>
+
+        <!-- Temperatura inicial -->
+        <div class="grupo-control">
+            <label for="thetaInicial">Temperatura inicial del agua θ(0) [°C]</label>
+            <input id="thetaInicial" type="range" min="0" max="100" step="1" value="25" />
+            <span class="valor">Valor: <span id="thetaInicialVal">25</span> °C</span>
+        </div>
+
+        <!-- Constantes del PID -->
+        <div class="grupo-control">
+            <label for="kp">Kp (Ganancia proporcional)</label>
+            <input id="kp" type="range" min="0" max="10" step="0.1" value="3" />
+            <span class="valor">Kp = <span id="kpVal">3.0</span></span>
+        </div>
+
+        <div class="grupo-control">
+            <label for="ki">Ki (Ganancia integral)</label>
+            <input id="ki" type="range" min="0" max="5" step="0.05" value="0.5" />
+            <span class="valor">Ki = <span id="kiVal">0.5</span></span>
+        </div>
+
+        <div class="grupo-control">
+            <label for="kd">Kd (Ganancia derivativa)</label>
+            <input id="kd" type="range" min="0" max="5" step="0.05" value="0.2" />
+            <span class="valor">Kd = <span id="kdVal">0.2</span></span>
+        </div>
+
+        <!-- Perturbación -->
+        <div class="grupo-control">
+            <label for="ampPert">Amplitud perturbación p(t) [°C]</label>
+            <input id="ampPert" type="range" min="-20" max="20" step="1" value="10" />
+            <span class="valor">Amplitud: <span id="ampPertVal">10</span> °C</span>
+        </div>
+
+        <div class="grupo-control">
+            <label for="tStartPert">Inicio perturbación [s]</label>
+            <input id="tStartPert" type="range" min="0" max="60" step="0.5" value="5" />
+            <span class="valor">t inicio: <span id="tStartPertVal">5.0</span> s</span>
+        </div>
+
+        <div class="grupo-control">
+            <label for="durPert">Duración perturbación Δt [s]</label>
+            <input id="durPert" type="range" min="0.5" max="20" step="0.5" value="3" />
+            <span class="valor">Δt: <span id="durPertVal">3.0</span> s</span>
+        </div>
+
+        <!-- Planta -->
+        <div class="grupo-control">
+            <label for="tau">Constante de tiempo de la planta τ [s]</label>
+            <input id="tau" type="range" min="0.5" max="20" step="0.5" value="5" />
+            <span class="valor">τ = <span id="tauVal">5.0</span> s</span>
+        </div>
+
+        <div class="grupo-control">
+            <label>Acciones</label>
+            <div class="botonera">
+                <button id="btnSimular">Simular (animado)</button>
+                <button id="btnDetener" class="secondary">Detener</button>
+                <button id="btnReset" class="secondary">Valores razonables</button>
+                <span style="font-size: 0.8rem; color:#6b7280;">
+                    Podés mover sliders mientras corre para ver el efecto en el transitorio.
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <section class="plots">
+        <div class="plot-card">
+            <h2>Salidas del sistema: θ₀(t), θ(t) y perturbación p(t)</h2>
+            <div id="plot1" class="plot"></div>
+        </div>
+
+        <div class="plot-card">
+            <h2>Señales internas: error e(t), realimentación f(t), salida del controlador u(t)</h2>
+            <div id="plot2" class="plot"></div>
+        </div>
+    </section>
+
+    <footer>
+        Simulación conceptual animada de lazo cerrado con controlador PID para una pava eléctrica.
+    </footer>
+</main>
+
+<script>
+    // -------------------------
+    // Sliders y textos
+    // -------------------------
+    const thetaRefSlider      = document.getElementById("thetaRef");
+    const thetaInicialSlider  = document.getElementById("thetaInicial");
+    const kpSlider            = document.getElementById("kp");
+    const kiSlider            = document.getElementById("ki");
+    const kdSlider            = document.getElementById("kd");
+    const ampPertSlider       = document.getElementById("ampPert");
+    const tStartPertSlider    = document.getElementById("tStartPert");
+    const durPertSlider       = document.getElementById("durPert");
+    const tauSlider           = document.getElementById("tau");
+
+    const thetaRefVal      = document.getElementById("thetaRefVal");
+    const thetaInicialVal  = document.getElementById("thetaInicialVal");
+    const kpVal            = document.getElementById("kpVal");
+    const kiVal            = document.getElementById("kiVal");
+    const kdVal            = document.getElementById("kdVal");
+    const ampPertVal       = document.getElementById("ampPertVal");
+    const tStartPertVal    = document.getElementById("tStartPertVal");
+    const durPertVal       = document.getElementById("durPertVal");
+    const tauVal           = document.getElementById("tauVal");
+
+    function bindSlider(slider, span, formatter = v => v) {
+        const update = () => span.textContent = formatter(slider.value);
+        slider.addEventListener("input", update);
+        update();
+    }
+
+    bindSlider(thetaRefSlider,     thetaRefVal);
+    bindSlider(thetaInicialSlider, thetaInicialVal, v => Number(v).toFixed(0));
+    bindSlider(kpSlider,           kpVal,           v => Number(v).toFixed(1));
+    bindSlider(kiSlider,           kiVal,           v => Number(v).toFixed(2));
+    bindSlider(kdSlider,           kdVal,           v => Number(v).toFixed(2));
+    bindSlider(ampPertSlider,      ampPertVal);
+    bindSlider(tStartPertSlider,   tStartPertVal,   v => Number(v).toFixed(1));
+    bindSlider(durPertSlider,      durPertVal,      v => Number(v).toFixed(1));
+    bindSlider(tauSlider,          tauVal,          v => Number(v).toFixed(1));
+
+    document.getElementById("btnReset").addEventListener("click", () => {
+        thetaRefSlider.value      = 90;
+        thetaInicialSlider.value  = 25;
+        kpSlider.value            = 3;
+        kiSlider.value            = 0.5;
+        kdSlider.value            = 0.2;
+        ampPertSlider.value       = 10;
+        tStartPertSlider.value    = 5;
+        durPertSlider.value       = 3;
+        tauSlider.value           = 5;
+
+        const event = new Event("input");
+        thetaRefSlider.dispatchEvent(event);
+        thetaInicialSlider.dispatchEvent(event);
+        kpSlider.dispatchEvent(event);
+        kiSlider.dispatchEvent(event);
+        kdSlider.dispatchEvent(event);
+        ampPertSlider.dispatchEvent(event);
+        tStartPertSlider.dispatchEvent(event);
+        durPertSlider.dispatchEvent(event);
+        tauSlider.dispatchEvent(event);
+    });
+
+    // -------------------------
+    // Estado de animación
+    // -------------------------
+    let animTimer = null;
+    const dt = 0.02; // paso de simulación (s)
+    const tVentana = 20; // segundos visibles en los gráficos
+
+    // Estado interno del sistema
+    let estado = {
+        t: 0,
+        theta: 0,
+        ePrev: 0,
+        integral: 0
+    };
+
+    function leerParametros() {
+        return {
+            thetaRef:      parseFloat(thetaRefSlider.value),
+            thetaInicial:  parseFloat(thetaInicialSlider.value),
+            Kp:            parseFloat(kpSlider.value),
+            Ki:            parseFloat(kiSlider.value),
+            Kd:            parseFloat(kdSlider.value),
+            ampPert:       parseFloat(ampPertSlider.value),
+            tStartPert:    parseFloat(tStartPertSlider.value),
+            durPert:       parseFloat(durPertSlider.value),
+            tau:           parseFloat(tauSlider.value)
+        };
+    }
+
+    function inicializarEstado() {
+        const params = leerParametros();
+        estado.t = 0;
+        estado.theta = params.thetaInicial; // arranca en θ(0)
+        estado.ePrev = 0;
+        estado.integral = 0;
+    }
+
+    // -------------------------
+    // Inicializar gráficos vacíos
+    // -------------------------
+    function inicializarGraficos() {
+        const layout1 = {
+            margin: { t: 20, r: 10, l: 45, b: 35 },
+            xaxis: { title: "Tiempo [s]" },
+            yaxis: { title: "Temperatura / Perturbación" },
+            legend: { orientation: "h" }
+        };
+
+        const layout2 = {
+            margin: { t: 20, r: 10, l: 45, b: 35 },
+            xaxis: { title: "Tiempo [s]" },
+            yaxis: { title: "Señales internas" },
+            legend: { orientation: "h" }
+        };
+
+        Plotly.newPlot("plot1", [
+            { x: [], y: [], name: "θ₀ (referencia)", mode: "lines", line: { dash: "dot" } },
+            { x: [], y: [], name: "θ(t) salida", mode: "lines" },
+            { x: [], y: [], name: "p(t) perturbación", mode: "lines" }
+        ], layout1, {responsive: true});
+
+        Plotly.newPlot("plot2", [
+            { x: [], y: [], name: "e(t) error", mode: "lines" },
+            { x: [], y: [], name: "f(t) realimentación = θ(t)", mode: "lines" },
+            { x: [], y: [], name: "u(t) salida del controlador", mode: "lines" }
+        ], layout2, {responsive: true});
+    }
+
+    // -------------------------
+    // Un paso de simulación + actualización de gráficos
+    // -------------------------
+    function pasoSimulacion() {
+        const params = leerParametros();
+        const { thetaRef, thetaInicial, Kp, Ki, Kd,
+                ampPert, tStartPert, durPert, tau } = params;
+
+        // Perturbación (pulso)
+        let p = 0;
+        if (estado.t >= tStartPert && estado.t <= (tStartPert + durPert)) {
+            p = ampPert;
+        }
+
+        // Realimentación
+        const f = estado.theta;
+
+        // Error
+        const e = thetaRef - f;
+
+        // PID
+        estado.integral += e * dt;
+        const derivada = (e - estado.ePrev) / dt;
+        let u = Kp * e + Ki * estado.integral + Kd * derivada;
+
+        // Saturación simple
+        if (u > 150) u = 150;
+        if (u < 0)   u = 0;
+
+        estado.ePrev = e;
+
+        // Planta de primer orden: dθ/dt = -(1/τ)*(θ - u) + p
+        const dtheta = (-(1 / tau) * (estado.theta - u) + p) * dt;
+        estado.theta = estado.theta + dtheta;
+
+        const tActual = estado.t;
+
+        // Extender trazas
+        Plotly.extendTraces("plot1", {
+            x: [[tActual], [tActual], [tActual]],
+            y: [[thetaRef], [estado.theta], [p]]
+        }, [0, 1, 2]);
+
+        Plotly.extendTraces("plot2", {
+            x: [[tActual], [tActual], [tActual]],
+            y: [[e], [f], [u]]
+        }, [0, 1, 2]);
+
+        // Ajustar ventana visible tipo osciloscopio (últimos tVentana segundos)
+        const tMin = Math.max(0, tActual - tVentana);
+        const tMax = tActual;
+
+        Plotly.relayout("plot1", { "xaxis.range": [tMin, tMax] });
+        Plotly.relayout("plot2", { "xaxis.range": [tMin, tMax] });
+
+        // Avanzar tiempo (no se corta nunca, hasta que apretes Detener)
+        estado.t += dt;
+    }
+
+    function iniciarAnimacion() {
+        detenerAnimacion(); // por si había una corriendo
+        inicializarEstado();
+        inicializarGraficos();
+
+        // Un paso inicial
+        pasoSimulacion();
+
+        animTimer = setInterval(pasoSimulacion, 30); // ~33 fps
+    }
+
+    function detenerAnimacion() {
+        if (animTimer !== null) {
+            clearInterval(animTimer);
+            animTimer = null;
+        }
+    }
+
+    document.getElementById("btnSimular").addEventListener("click", iniciarAnimacion);
+    document.getElementById("btnDetener").addEventListener("click", detenerAnimacion);
+
+    // Arranca con gráficos vacíos
+    window.addEventListener("load", inicializarGraficos);
+</script>
+</body>
+</html>
