@@ -152,6 +152,7 @@ Se implementa como un **pulso rectangular**:
 $$
 t \in [t_{\text{inicio}},\; t_{\text{inicio}} + \Delta t]
 $$
+
 ---
 
 ## 7. Experimentos sugeridos
