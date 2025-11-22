@@ -1,6 +1,6 @@
-# 📘 README – Simulación PID de Pava Eléctrica Inteligente
+# README – Simulación PID de Pava Eléctrica Inteligente
 
-## 🧩 1. Introducción
+## 1. Introducción
 
 Este proyecto implementa una **simulación interactiva y animada** del control de temperatura de una pava eléctrica mediante un **controlador PID**.  
 El objetivo es visualizar en **tiempo real** cómo el sistema reacciona frente a:
@@ -23,7 +23,7 @@ Permite estudiar el **transitorio, el estacionario, la estabilidad y el rechazo 
 
 ---
 
-## 🚀 2. Cómo ejecutar la simulación
+## 2. Cómo ejecutar la simulación
 
 1. Descargar la carpeta del proyecto.  
 2. Abrir **`index.html`** con un navegador moderno (Chrome, Edge, Firefox).  
@@ -32,9 +32,9 @@ No requiere instalación, servidor ni conexión a internet.
 
 ---
 
-## 🎛️ 3. Panel de controles
+## 3. Panel de controles
 
-### 🔵 3.1 Señales principales
+### 3.1 Señales principales
 
 - **θ₀ – Temperatura nominal [°C]**  
   Es la temperatura objetivo que el controlador intenta mantener.
@@ -44,7 +44,7 @@ No requiere instalación, servidor ni conexión a internet.
 
 ---
 
-### 🟢 3.2 Control PID
+### 3.2 Control PID
 | Parámetro |                       Efecto                         |
 |-----------|------------------------------------------------------|
 | **Kp**    | Acelera la respuesta; demasiado alto → oscilaciones. |
@@ -55,7 +55,7 @@ Los tres sliders pueden modificarse mientras la simulación está corriendo para
 
 ---
 
-### 🟠 3.3 Perturbación p(t)
+### 3.3 Perturbación p(t)
 
 - **Amplitud:** magnitud de la perturbación (°C).  
 - **Inicio:** segundo a partir del cual se aplica.  
@@ -65,7 +65,7 @@ La perturbación modela, por ejemplo, una pérdida de calor repentina o un cambi
 
 ---
 
-### 🟣 3.4 Dinámica de la planta
+### 3.4 Dinámica de la planta
 
 - **τ – Constante de tiempo [s]**  
   - τ grande → pava lenta (respuesta más suave).  
@@ -73,7 +73,7 @@ La perturbación modela, por ejemplo, una pérdida de calor repentina o un cambi
 
 ---
 
-## 🕹️ 4. Botones
+## 4. Botones
 
 - **Simular (animado):** inicia la simulación continua.  
 - **Detener:** pausa la simulación en el estado actual.  
@@ -83,7 +83,7 @@ Los sliders pueden moverse mientras la simulación está en marcha.
 
 ---
 
-## 📈 5. Gráficos mostrados
+## 5. Gráficos mostrados
 
 ### 5.1 Gráfico 1 – Señales externas
 
@@ -105,15 +105,16 @@ Este gráfico permite ver cómo actúa el controlador para corregir el error y e
 
 ---
 
-## 🧮 6. Modelo matemático
+## 6. Modelo matemático
 
 ### 6.1 Planta de primer orden
 
 Se modela la pava eléctrica como un sistema de primer orden:
 
-\[
+$$
 \frac{d\theta}{dt} = -\frac{1}{\tau}(\theta - u(t)) + p(t)
-\]
+$$
+
 
 donde:
 
@@ -128,15 +129,14 @@ donde:
 
 La señal de error es:
 
-\[
+$$
 e(t) = \theta_0 - \theta(t)
-\]
+$$
 
-El control PID discreto implementado es:
+$$
+u(t) = K_p\,e(t) + K_i \int e(t)\,dt + K_d \frac{de(t)}{dt}
+$$
 
-\[
-u(t) = K_p e(t) + K_i \int e(t) dt + K_d \frac{de}{dt}
-\]
 
 con integración acumulada y derivada aproximada por diferencias finitas.
 
@@ -151,9 +151,9 @@ Se implementa como un **pulso rectangular**:
 
 ---
 
-## 🔍 7. Experimentos sugeridos
+## 7. Experimentos sugeridos
 
-### ✔ Rechazo de perturbaciones
+### Rechazo de perturbaciones
 - θ₀ = 90°C  
 - θ(0) = 90°C  
 - Amplitud de perturbación: +10°C  
@@ -163,7 +163,7 @@ Se observa cómo el sistema vuelve al valor nominal luego de la perturbación.
 
 ---
 
-### ✔ Análisis del transitorio
+### Análisis del transitorio
 
 - θ(0) = 25°C  
 - θ₀ = 85°C  
@@ -172,7 +172,7 @@ Permite ver la curva de calentamiento, el sobrepaso (si existe) y el tiempo de e
 
 ---
 
-### ✔ Inestabilidad (mala sintonización)
+### Inestabilidad (mala sintonización)
 
 Probar, por ejemplo:
 
@@ -184,7 +184,7 @@ Pueden observarse oscilaciones grandes o inestables, mostrando el límite de la 
 
 ---
 
-## 🧭 8. Valores de PID recomendados
+## 8. Valores de PID recomendados
 
 | Objetivo             | Kp   | Ki       | Kd      |
 |----------------------|------|----------|---------|
@@ -196,7 +196,7 @@ Estos rangos son orientativos y se pueden ajustar para mostrar diferentes compor
 
 ---
 
-## 📂 9. Archivos incluidos
+## 9. Archivos incluidos
 
 - **index.html** → Simulación completa (HTML + CSS + JS + Plotly).  
 - **README.md** → Manual de usuario y documentación técnica.
